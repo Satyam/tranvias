@@ -59,3 +59,6 @@ typings/
 
 # next.js build output
 .next
+
+#firebase key (should not be shared in public)
+datos/tranvias-ebff1-firebase-adminsdk-fh8ll-b7d7e06738.json

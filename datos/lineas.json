@@ -1,0 +1,17 @@
+[
+  {
+    "idLine": "1",
+    "descr": "Línea 1",
+    "color": "red"
+  },
+  {
+    "idLine": "2",
+    "descr": "Línea 2",
+    "color": "blue"
+  },
+  {
+    "idLine": "3",
+    "descr": "Línea 3",
+    "color": "green"
+  }
+]
