@@ -1,0 +1,43 @@
+.stopInfo {
+  padding: 0;
+}
+.leaflet-popup-pane button {
+  display: block;
+  width: 100%;
+  opacity: 0.5;
+  margin: 1px 0;
+}
+.leaflet-popup-pane h1 {
+  font-size: 1.5em;
+  text-align: center;
+}
+.fablab-waypoint-icon {
+  background-color: red;
+  color: red;
+  cursor: move;
+  border: cyan solid 1.5px;
+}
+.fablab-stop-icon,
+.fablab-editing-icon,
+fablab-editing-x-icon {
+  cursor: move;
+}
+.fablab-editing-x-icon {
+  background-color: silver;
+}
+.fablab-hilite {
+  border: thin solid red;
+}
+.gps .leaflet-container {
+  cursor: crosshair;
+}
+#lineas .glyphicon {
+  opacity: 0.5;
+}
+#lineas .glyphicon:hover {
+  opacity: 1;
+}
+#lineas {
+  list-style-type: none;
+  padding-left: 0;
+}
