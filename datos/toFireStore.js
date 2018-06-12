@@ -40,24 +40,24 @@ const convert = require('xml-js');
 // console.log(ways);
 // fs.writeFileSync('./sitges.json', JSON.stringify(nodes, null, 2));
 //
-let changed = false;
-for (idRoute in routes) {
-  let route = routes[idRoute];
-  if (typeof route.route === 'string') {
-    changed = true;
-    let r = JSON.parse(route.route);
-    route.route = r.map(tramo => ({
-      lat: tramo[0],
-      lng: tramo[1],
-    }));
-  }
-}
-
-if (changed) {
-  fs.writeFileSync('./routes.json', JSON.stringify(routes, null, 2));
-} else {
-  console.log('nothing changed');
-}
+// let changed = false;
+// for (idRoute in routes) {
+//   let route = routes[idRoute];
+//   if (typeof route.route === 'string') {
+//     changed = true;
+//     let r = JSON.parse(route.route);
+//     route.route = r.map(tramo => ({
+//       lat: tramo[0],
+//       lng: tramo[1],
+//     }));
+//   }
+// }
+//
+// if (changed) {
+//   fs.writeFileSync('./routes.json', JSON.stringify(routes, null, 2));
+// } else {
+//   console.log('nothing changed');
+// }
 
 const fStore = {
   lineas: {},
@@ -65,44 +65,53 @@ const fStore = {
 };
 
 fStore.lineas = lineas.reduce((acc, linea) => {
-  acc[linea.idLine] = linea;
+  acc['l_' + linea.idLine] = {
+    descr: linea.descr,
+    color: linea.color,
+  };
+
   return acc;
 }, {});
 
 let id = 1;
-fStore.nodos = Object.values(routes).reduce((acc, tramo) => {
-  const idLinea = tramo.idLine;
+lineas.forEach(linea => {
   let stopEnd = 0;
-  if (tramo.idStopStart !== stopEnd) {
-    stopEnd = tramo.idStopEnd;
-    acc[id] = {
-      lat: Number(stops[tramo.idStopStart].lat),
-      lng: Number(stops[tramo.idStopStart].lng),
-      stop: true,
-      idLinea,
-      orden: id,
-    };
-    id += 1;
-  }
-  tramo.route.forEach(n => {
-    acc[id] = {
-      lat: Number(n.lat),
-      lng: Number(n.lng),
-      idLinea,
-      orden: id,
-    };
-    id += 1;
-  });
-  acc[id] = {
-    lat: Number(stops[tramo.idStopEnd].lat),
-    lng: Number(stops[tramo.idStopEnd].lng),
-    stop: true,
-    idLinea,
-    orden: id,
-  };
-  id += 1;
+  fStore.nodos = Object.keys(routes)
+    .sort()
+    .reduce((acc, idTramo) => {
+      const tramo = routes[idTramo];
+      if (tramo.idLine !== linea.idLine) {
+        return acc;
+      }
+      const idLinea = 'l_' + tramo.idLine;
+      // if (tramo.idStopStart !== stopEnd) {
+      acc[id] = {
+        lat: Number(stops[tramo.idStopStart].lat),
+        lng: Number(stops[tramo.idStopStart].lng),
+        stop: true,
+        [idLinea]: id,
+      };
+      id += 1;
+      // }
+      tramo.route.forEach(n => {
+        acc[id] = {
+          lat: Number(n.lat),
+          lng: Number(n.lng),
+          [idLinea]: id,
+        };
+        id += 1;
+      });
+      acc[id] = {
+        lat: Number(stops[tramo.idStopEnd].lat),
+        lng: Number(stops[tramo.idStopEnd].lng),
+        stop: true,
+        [idLinea]: id,
+      };
+      id += 1;
+      stopEnd = tramo.idStopEnd;
 
-  return acc;
-}, {});
+      return acc;
+    }, {});
+});
 
 fs.writeFileSync('./fStore.json', JSON.stringify(fStore, null, 2));
