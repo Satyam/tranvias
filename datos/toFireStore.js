@@ -75,43 +75,44 @@ fStore.lineas = lineas.reduce((acc, linea) => {
 
 let id = 1;
 lineas.forEach(linea => {
+  const idLinea = 'l_' + linea.idLine;
   let stopEnd = 0;
-  fStore.nodos = Object.keys(routes)
-    .sort()
-    .reduce((acc, idTramo) => {
-      const tramo = routes[idTramo];
-      if (tramo.idLine !== linea.idLine) {
+  fStore.nodos = Object.assign(
+    fStore.nodos,
+    Object.keys(routes)
+      .sort((a, b) => a - b) // Compare numeric
+      .reduce((acc, idTramo) => {
+        const tramo = routes[idTramo];
+        if (tramo.idLine === linea.idLine) {
+          if (tramo.idStopStart !== stopEnd) {
+            acc[id] = {
+              lat: Number(stops[tramo.idStopStart].lat),
+              lng: Number(stops[tramo.idStopStart].lng),
+              stop: true,
+              [idLinea]: id,
+            };
+            id += 1;
+          }
+          tramo.route.forEach(n => {
+            acc[id] = {
+              lat: Number(n.lat),
+              lng: Number(n.lng),
+              [idLinea]: id,
+            };
+            id += 1;
+          });
+          acc[id] = {
+            lat: Number(stops[tramo.idStopEnd].lat),
+            lng: Number(stops[tramo.idStopEnd].lng),
+            stop: true,
+            [idLinea]: id,
+          };
+          id += 1;
+          stopEnd = tramo.idStopEnd;
+        }
         return acc;
-      }
-      const idLinea = 'l_' + tramo.idLine;
-      // if (tramo.idStopStart !== stopEnd) {
-      acc[id] = {
-        lat: Number(stops[tramo.idStopStart].lat),
-        lng: Number(stops[tramo.idStopStart].lng),
-        stop: true,
-        [idLinea]: id,
-      };
-      id += 1;
-      // }
-      tramo.route.forEach(n => {
-        acc[id] = {
-          lat: Number(n.lat),
-          lng: Number(n.lng),
-          [idLinea]: id,
-        };
-        id += 1;
-      });
-      acc[id] = {
-        lat: Number(stops[tramo.idStopEnd].lat),
-        lng: Number(stops[tramo.idStopEnd].lng),
-        stop: true,
-        [idLinea]: id,
-      };
-      id += 1;
-      stopEnd = tramo.idStopEnd;
-
-      return acc;
-    }, {});
+      }, {})
+  );
 });
 
 fs.writeFileSync('./fStore.json', JSON.stringify(fStore, null, 2));

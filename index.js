@@ -37,7 +37,7 @@ $(function() {
   var drawStop = function(idNode, node) {
     stopMarkers[idNode] = L.marker([node.lat, node.lng], {
       icon: stopIcon,
-      title: node.idLinea || '',
+      title: idNode || '',
     }).addTo(map);
   };
 
@@ -88,12 +88,14 @@ $(function() {
           const n = doc.data();
           const nid = doc.id;
 
-          console.log(`${nid} => ${JSON.stringify(n, null, 2)}`);
-          latLngs.push([n.lat, n.lng]);
+          // console.log(`${nid} => ${JSON.stringify(n, null, 2)}`);
           if (n.stop) {
             drawStop(nid, n);
+          } else {
+            latLngs.push([n.lat, n.lng]);
           }
         });
+        console.log(idLinea, latLngs);
         l.polyline = L.polyline(latLngs, {
           color: l.color,
           weight: 3,
