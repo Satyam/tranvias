@@ -41,40 +41,39 @@ $(function() {
     }).addTo(map);
   };
 
+  // Show bus stops
+  var showStops = function() {
+    const stopsVisible = $('#stops').prop('checked') ? 1 : 0;
+    Object.values(stopMarkers).forEach(marker => {
+      marker.setOpacity(stopsVisible);
+    });
+  };
+
+  $('#stops').on('click', showStops);
+
   // Show bus routes
   var showRoutes = function() {
-    var routesVisible = $('#routes').prop('checked');
-    $.each(routes, function(id, route) {
-      if (!route) return;
-      route.marker.setStyle({
-        opacity: lines[route.idLine].visible && routesVisible ? 1 : 0,
-      });
+    const routesVisible = $('#routes').prop('checked');
+    Object.values(lineas).forEach(l => {
+      if (l.polyline) {
+        l.polyline.setStyle({
+          opacity: l.visible && routesVisible ? 1 : 0,
+        });
+      }
     });
   };
 
   $('#routes').on('click', showRoutes);
 
-  // Show bus stops
-  var showStops = function() {
-    var stopsVisible = $('#stops').prop('checked') ? 1 : 0;
-    $.each(stops, function(id, stop) {
-      if (stop && stop.marker) {
-        stop.marker.setOpacity(stopsVisible);
-      }
-    });
-  };
-  $('#stops').on('click', showStops);
-
   // Depending on which bus lines are visible, show them
 
-  var checkBusVisibility = function() {
-    $('#lineas input').each(function() {
-      var el = $(this);
-      lines[el.val()].visible = el.prop('checked');
-    });
+  var checkBusVisibility = function(ev) {
+    const input = ev.target;
+    lineas[input.value].visible = input.checked;
+
     showRoutes();
-    refreshBusVisibility();
   };
+
   $('#lineas').on('click', 'input', checkBusVisibility);
 
   function readNodos(idLinea, l) {
@@ -101,6 +100,7 @@ $(function() {
           weight: 3,
           opacity: 1,
         }).addTo(map);
+        l.visible = true;
       });
   }
 
