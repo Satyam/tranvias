@@ -15,7 +15,7 @@ $(function() {
   });
 
   // Basic map display
-  var map = L.map('map', {
+  const map = L.map('map', {
     center: [41.2358883, 1.8063239],
     zoom: 15,
   });
@@ -26,55 +26,55 @@ $(function() {
       '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
   }).addTo(map);
 
-  var stopIcon = L.icon({
+  const stopIcon = L.icon({
     iconUrl: 'icons/Bus-icon.svg',
     iconSize: [20, 20],
     iconAnchor: [10, 10],
     popupAnchor: [0, -10],
     className: 'fablab-stop-icon',
   });
+
   // Drawings bus stops
-  var drawStop = function(idNode, node) {
+  function drawStop(idNode, node) {
     stopMarkers[idNode] = L.marker([node.lat, node.lng], {
       icon: stopIcon,
       title: idNode || '',
     }).addTo(map);
-  };
+  }
+
+  // Show bus stops
+  function showStops() {
+    const stopsVisible = $('#stops').prop('checked') ? 1 : 0;
+    Object.values(stopMarkers).forEach(marker => {
+      marker.setOpacity(stopsVisible);
+    });
+  }
+
+  $('#stops').on('click', showStops);
 
   // Show bus routes
-  var showRoutes = function() {
-    var routesVisible = $('#routes').prop('checked');
-    $.each(routes, function(id, route) {
-      if (!route) return;
-      route.marker.setStyle({
-        opacity: lines[route.idLine].visible && routesVisible ? 1 : 0,
-      });
+  function showRoutes() {
+    const routesVisible = $('#routes').prop('checked');
+    Object.values(lineas).forEach(l => {
+      if (l.polyline) {
+        l.polyline.setStyle({
+          opacity: l.visible && routesVisible ? 1 : 0,
+        });
+      }
     });
-  };
+  }
 
   $('#routes').on('click', showRoutes);
 
-  // Show bus stops
-  var showStops = function() {
-    var stopsVisible = $('#stops').prop('checked') ? 1 : 0;
-    $.each(stops, function(id, stop) {
-      if (stop && stop.marker) {
-        stop.marker.setOpacity(stopsVisible);
-      }
-    });
-  };
-  $('#stops').on('click', showStops);
-
   // Depending on which bus lines are visible, show them
 
-  var checkBusVisibility = function() {
-    $('#lineas input').each(function() {
-      var el = $(this);
-      lines[el.val()].visible = el.prop('checked');
-    });
+  function checkBusVisibility(ev) {
+    const input = ev.target;
+    lineas[input.value].visible = input.checked;
+
     showRoutes();
-    refreshBusVisibility();
-  };
+  }
+
   $('#lineas').on('click', 'input', checkBusVisibility);
 
   function readNodos(idLinea, l) {
@@ -95,12 +95,13 @@ $(function() {
             latLngs.push([n.lat, n.lng]);
           }
         });
-        console.log(idLinea, latLngs);
+        // console.log(idLinea, latLngs);
         l.polyline = L.polyline(latLngs, {
           color: l.color,
           weight: 3,
           opacity: 1,
         }).addTo(map);
+        l.visible = true;
       });
   }
 
@@ -111,7 +112,7 @@ $(function() {
         snapshot.forEach(doc => {
           const idLinea = doc.id;
           const l = doc.data();
-          console.log(`${idLinea} => ${JSON.stringify(l, null, 2)}`);
+          // console.log(`${idLinea} => ${JSON.stringify(l, null, 2)}`);
           lineas[idLinea] = l;
           $('#lineas').append(
             `<p style="color:${
@@ -126,44 +127,3 @@ $(function() {
   }
   readLineas();
 });
-
-// ).done(function(rLines, rStops, rRoutes) {
-//   // Showing the color legends and saving the lines info
-//   $('#lineas').append(
-//     $
-//       .map(rLines[0], function(l) {
-//         if (!l) return;
-//         lines[parseInt(l.idLine, 10)] = {
-//           color: l.color,
-//           descr: l.descr,
-//           visible: true,
-//         };
-//         markers[l.idLine] = L.marker([41.2358883, 1.8063239], {
-//           icon: L.icon({
-//             iconUrl: 'icons/Bus_icon_' + l.color + '.jpg',
-//             iconSize: [20, 20],
-//             iconAnchor: [10, 10],
-//             popupAnchor: [0, -10],
-//             className: 'fablab-stop-icon',
-//           }),
-//         }).addTo(map);
-//         return template(
-//           '<p style="color:{color}"><input type="checkbox" value="{idLine}" checked/> {descr}</p>',
-//           l
-//         );
-//       })
-//       .join('')
-//   );
-//
-//   stops = rStops[0];
-//   $.each(stops, drawStop);
-//
-//   routes = rRoutes[0];
-//   $.each(routes, drawRoute);
-//
-//   checkBusVisibility();
-//   // show buses
-//   refreshBuses();
-//   // Timer to refresh values
-//   window.setInterval(refreshBuses, 5000);
-// });
