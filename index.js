@@ -91,9 +91,8 @@ $(function() {
           // console.log(`${nid} => ${JSON.stringify(n, null, 2)}`);
           if (n.stop) {
             drawStop(nid, n);
-          } else {
-            latLngs.push([n.lat, n.lng]);
           }
+          latLngs.push([n.lat, n.lng]);
         });
         // console.log(idLinea, latLngs);
         l.polyline = L.polyline(latLngs, {

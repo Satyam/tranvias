@@ -69,50 +69,54 @@ fStore.lineas = lineas.reduce((acc, linea) => {
     descr: linea.descr,
     color: linea.color,
   };
-
   return acc;
 }, {});
 
+const hash = lineas.reduce((acc, linea) => {
+  acc[linea.idLine] = {};
+  return acc;
+}, {});
+
+Object.keys(routes).forEach(idTramo => {
+  const tramo = routes[idTramo];
+  hash[tramo.idLine][tramo.idStopStart] = idTramo;
+});
+
+const nd = fStore.nodos;
 let id = 1;
-lineas.forEach(linea => {
-  const idLinea = 'l_' + linea.idLine;
-  let stopEnd = 0;
-  fStore.nodos = Object.assign(
-    fStore.nodos,
-    Object.keys(routes)
-      .sort((a, b) => a - b) // Compare numeric
-      .reduce((acc, idTramo) => {
-        const tramo = routes[idTramo];
-        if (tramo.idLine === linea.idLine) {
-          if (tramo.idStopStart !== stopEnd) {
-            acc[id] = {
-              lat: Number(stops[tramo.idStopStart].lat),
-              lng: Number(stops[tramo.idStopStart].lng),
-              stop: true,
-              [idLinea]: id,
-            };
-            id += 1;
-          }
-          tramo.route.forEach(n => {
-            acc[id] = {
-              lat: Number(n.lat),
-              lng: Number(n.lng),
-              [idLinea]: id,
-            };
-            id += 1;
-          });
-          acc[id] = {
-            lat: Number(stops[tramo.idStopEnd].lat),
-            lng: Number(stops[tramo.idStopEnd].lng),
-            stop: true,
-            [idLinea]: id,
-          };
-          id += 1;
-          stopEnd = tramo.idStopEnd;
-        }
-        return acc;
-      }, {})
-  );
+
+Object.keys(hash).forEach(idLine => {
+  const idLinea = 'l_' + idLine;
+  let idTramo = Object.values(hash[idLine])[0];
+  const idInicial = idTramo;
+  let first = true;
+  while (idTramo && (first || idTramo !== idInicial)) {
+    first = false;
+    const tramo = routes[idTramo];
+    idTramo = hash[idLine][tramo.idStopEnd];
+    nd[id] = {
+      lat: Number(stops[tramo.idStopStart].lat),
+      lng: Number(stops[tramo.idStopStart].lng),
+      stop: true,
+      [idLinea]: id,
+    };
+    id += 1;
+    tramo.route.forEach(n => {
+      nd[id] = {
+        lat: Number(n.lat),
+        lng: Number(n.lng),
+        [idLinea]: id,
+      };
+      id += 1;
+    });
+    nd[id] = {
+      lat: Number(stops[tramo.idStopEnd].lat),
+      lng: Number(stops[tramo.idStopEnd].lng),
+      stop: true,
+      [idLinea]: id,
+    };
+    id += 1;
+  }
 });
 
 fs.writeFileSync('./fStore.json', JSON.stringify(fStore, null, 2));
