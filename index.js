@@ -43,17 +43,17 @@ $(function() {
   }
 
   // Show bus stops
-  function showStops() {
+  function visibilityStops() {
     const stopsVisible = $('#stops').prop('checked') ? 1 : 0;
     Object.values(stopMarkers).forEach(marker => {
       marker.setOpacity(stopsVisible);
     });
   }
 
-  $('#stops').on('click', showStops);
+  $('#stops').on('click', visibilityStops);
 
   // Show bus routes
-  function showRoutes() {
+  function visibilityRoutes() {
     const routesVisible = $('#routes').prop('checked');
     Object.values(lineas).forEach(l => {
       if (l.polyline) {
@@ -64,18 +64,18 @@ $(function() {
     });
   }
 
-  $('#routes').on('click', showRoutes);
+  $('#routes').on('click', visibilityRoutes);
 
   // Depending on which bus lines are visible, show them
 
-  function checkBusVisibility(ev) {
+  function visibilityByRoute(ev) {
     const input = ev.target;
     lineas[input.value].visible = input.checked;
 
-    showRoutes();
+    visibilityRoutes();
   }
 
-  $('#lineas').on('click', 'input', checkBusVisibility);
+  $('#lineas').on('click', 'input', visibilityByRoute);
 
   function readNodos(idLinea, l) {
     db.collection('nodos')
